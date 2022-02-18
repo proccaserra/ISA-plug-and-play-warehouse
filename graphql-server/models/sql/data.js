@@ -489,7 +489,7 @@ module.exports = class data extends Sequelize.Model {
 
     urlThumbnail({width, height, format}){
         if(this.isImage() ){
-            let url = `${URL_IMG_PROXY}/preset:sharp/resize:fill:300:400:0/gravity:sm/plain/s3://images/${this.fileName}@${format}`;
+            let url = `${URL_IMG_PROXY}/preset:sharp/resize:auto:${width}:${height}:0/gravity:sm/plain/s3://images/${this.fileName}@${format}`;
             return url;
         }
         return "This file attachment is not an image";
