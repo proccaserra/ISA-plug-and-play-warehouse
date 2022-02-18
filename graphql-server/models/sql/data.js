@@ -83,9 +83,9 @@ const definition = {
 };
 const DataLoader = require("dataloader");
 
-const URL_IMG_PROXY = "http://localhost:8082/";
-const IMG_BUCKET_NAME = "images";
-const FILES_BUCKET_NAME = "test";
+const URL_IMG_PROXY = process.env.URL_IMG_PROXY || "http://localhost:8082/";
+const IMG_BUCKET_NAME = process.env.IMG_BUCKET_NAME || "images";
+const FILES_BUCKET_NAME = process.env.FILES_BUCKET_NAME || "files";
 
 /**
  * module - Creates a sequelize model
