@@ -23,5 +23,5 @@ node -e 'require("./utils/migration").up()'
 if [ $dev = true ]; then
   npm run dev # acl
 else
-  npm start # acl
+  npm start acl
 fi
