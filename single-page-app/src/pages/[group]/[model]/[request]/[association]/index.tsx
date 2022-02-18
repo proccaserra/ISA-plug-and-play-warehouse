@@ -100,8 +100,6 @@ const Association: PageWithLayout<AssociationUrlQuery> = (props) => {
   const zendro = useZendroClient();
   const { t } = useTranslation();
 
-  console.log({ m: props.model });
-
   const theme = useTheme();
   const mobile = useMediaQuery(theme.breakpoints.only('xs'));
 

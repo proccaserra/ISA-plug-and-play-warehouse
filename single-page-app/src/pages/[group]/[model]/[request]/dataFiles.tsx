@@ -68,7 +68,6 @@ const Association: PageWithLayout<AssociationUrlQuery> = () => {
   const zendro = useZendroClient();
   const { t } = useTranslation();
   const getModel = useModel();
-  console.log({ q: zendro.queries });
 
   const urlQuery = router.query as AssociationUrlQuery;
 
@@ -206,7 +205,6 @@ const Association: PageWithLayout<AssociationUrlQuery> = () => {
       });
 
       if (data) {
-        console.log({ data });
         const assocName =
           recordsFilter === 'associated'
             ? undefined
