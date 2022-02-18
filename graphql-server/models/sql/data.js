@@ -83,7 +83,7 @@ const definition = {
 };
 const DataLoader = require("dataloader");
 
-const URL_IMG_PROXY = process.env.URL_IMG_PROXY || "http://localhost:8082/";
+const URL_IMG_PROXY = process.env.URL_IMG_PROXY || "http://localhost:8082";
 const IMG_BUCKET_NAME = process.env.IMG_BUCKET_NAME || "images";
 const FILES_BUCKET_NAME = process.env.FILES_BUCKET_NAME || "files";
 
@@ -489,7 +489,7 @@ module.exports = class data extends Sequelize.Model {
 
     urlThumbnail({width, height, format}){
         if(this.isImage() ){
-            let url = `${URL_IMG_PROXY}unsafe/fit/${width}/${height}/sm/0/plain/s3://images/${this.fileName}@${format}`;
+            let url = `${URL_IMG_PROXY}/preset:sharp/resize:fill:300:400:0/gravity:sm/plain/s3://images/${this.fileName}@${format}`;
             return url;
         }
         return "This file attachment is not an image";
