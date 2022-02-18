@@ -1,1 +1,9 @@
+# NPM
 node_modules
+
+# environment
+
+.env
+.env.development
+.env.production
+.env.test
