@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type" />
+    <meta content="utf-8" http-equiv="encoding" />
+
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1023.0.min.js"></script>
+
+    <script src="https://cdn.plot.ly/plotly-2.4.2.min.js"></script>
+  </head>
+  <body>
+    <h1>Plots</h1>
+    <div id="myPlot"><!-- Plotly chart will be drawn inside this DIV --></div>
+    <script>
+      var s3 = new AWS.S3({
+        accessKeyId: 'minio',
+        secretAccessKey: 'miniominio',
+        endpoint: `http://localhost:9000`,
+        s3ForcePathStyle: true,
+        signatureVersion: 'v4',
+      });
+
+      var params = {
+        Bucket: 'test',
+        Key: '20220127_Analysis_Tomato_both_cpm_merged.csv',
+        ExpressionType: 'SQL',
+        InputSerialization: {
+          CSV: {
+            FileHeaderInfo: 'USE',
+            RecordDelimiter: '\n',
+            FieldDelimiter: '\t',
+            Comments: '#',
+          },
+          CompressionType: 'NONE',
+        },
+        OutputSerialization: {
+          JSON: {
+            RecordDelimiter: ',',
+          },
+        },
+      };
+
+      // Set up the SQL query to the table.
+      var query = {
+        ...params,
+        // Expression: `SELECT "FL.04 end of flowering stage, long day length regimen, receptacle, E-GEOD-35288" FROM S3Object WHERE "Gene ID" = 'AT1G01010'`,
+        Expression: `SELECT * FROM S3Object WHERE "cpm_rownames" = 'Solyc05g053550.3.1'`,
+      };
+
+      // run the query, parse it and plot the results using plotly.
+      s3.selectObjectContent(query)
+        .promise()
+        // parse the response
+        .then((res) => {
+          var events = res.Payload;
+          let records;
+          events.forEach((event) => {
+            // Check the top-level field to determine which event this is.
+            if (event.Records) {
+              // handle Records event
+              records = JSON.parse(
+                event.Records.Payload.toString().slice(0, -1)
+              );
+            }
+          });
+
+					const mean = (array) => {
+						const sum = array.reduce((a, b) => parseFloat(a) + parseFloat(b), 0);
+						return sum / array.length;
+					}
+
+					const sd = (array) => {
+						const n = array.length
+						const avg = mean(array);
+						return Math.sqrt(array.map(x => Math.pow(x - avg, 2)).reduce((a, b) => a + b) / n)
+					}
+
+					const lycopersicum = Object.fromEntries(Object.entries(records).filter(([key]) => key.includes('lycopersicum')));
+					const pennellii = Object.fromEntries(Object.entries(records).filter(([key]) => key.includes('pennellii')));
+
+					let processedLycopersicumData = {};
+					let processedPennelliiData = {};
+
+					Object.entries(lycopersicum).sort().map(([k,v]) => {
+						const split = k.split('.');
+						const species = split[0];
+						const sample = split[1];
+						if (processedLycopersicumData[sample] !== undefined)
+						processedLycopersicumData[sample].push(v)
+						else 
+						processedLycopersicumData[sample] = [v];
+					})
+
+					Object.entries(pennellii).sort().map(([k,v]) => {
+						const split = k.split('.');
+						const species = split[0];
+						const sample = split[1];
+						if (processedPennelliiData[sample] !== undefined)
+						processedPennelliiData[sample].push(v)
+						else 
+						processedPennelliiData[sample] = [v];
+					})
+
+					const lycopersicumTrace = {
+						x: Object.keys(processedLycopersicumData),
+						y: Object.values(processedLycopersicumData).map((sample) => mean(sample)),
+						error_y: {
+							type: 'data',
+							array: Object.values(processedLycopersicumData).map((sample) => sd(sample)),
+							visible: true
+						},
+						name: 'Solanum lycopersicum',
+ 						type: 'bar'
+					}
+
+					const pennelliiTrace = {
+						x: Object.keys(processedPennelliiData),
+						y: Object.values(processedPennelliiData).map((sample) => mean(sample)),
+						error_y: {
+							type: 'data',
+							array: Object.values(processedPennelliiData).map((sample) => sd(sample)),
+							visible: true
+						},
+						name: 'Solanum pennellii',
+ 						type: 'bar'
+					}
+
+          // plot the data via plotly
+          var data = [lycopersicumTrace, pennelliiTrace];
+          var layout = {
+            font: { size: 9.5 },
+            xaxis: { automargin: true },
+            height: 900,
+						title: {
+							text: "Expression of Solyc05g053550.3.1 in Solanum species under various conditions",
+							font: {
+								size: 21
+							}
+						},
+						xaxis: {
+							title: {
+								text: 'condition',
+								font: {
+									size: 18,
+								}
+							},
+ 						},
+						yaxis: {
+							title: {
+								text: 'Expression [cpm]',
+								font: {
+									size: 18,
+								}
+							},
+ 						},
+          };
+          var config = { responsive: true };
+          Plotly.newPlot('myPlot', data, layout, config);
+        });
+    </script>
+  </body>
+</html>
