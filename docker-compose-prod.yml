@@ -107,21 +107,21 @@ services:
       - ./data_model_definitions:/usr/data_model_definitions
     # Install dependencies and start single-page-app-server in development
     # mode.
-    # command:
-    #   - /bin/sh
-    #   - -c
-    #   - |
-    #     rm -rf .next
-    #     rm -rf out
-    #     yarn install
-    #     yarn build
-    #     yarn start
     command:
       - /bin/sh
       - -c
       - |
+        rm -rf .next
+        rm -rf out
         yarn install
-        yarn dev
+        yarn build
+        yarn start
+    # command:
+    #   - /bin/sh
+    #   - -c
+    #   - |
+    #     yarn install
+    #     yarn dev
     networks:
       zendro:
 
@@ -147,20 +147,14 @@ services:
     # mode.
     networks:
       zendro:
-    # command:
-    #   - /bin/sh
-    #   - -c
-    #   - |
-    #     rm -rf .next
-    #     rm -rf out
-    #     yarn install
-    #     yarn build
-    #     yarn start
     command:
       - /bin/sh
       - -c
       - |
+        rm -rf .next
+        rm -rf out
         yarn install
+        yarn build
         yarn start
 
   isa_minio:
